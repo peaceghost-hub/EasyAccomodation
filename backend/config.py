@@ -133,9 +133,14 @@ class Config:
         'http://localhost:5000',  # Flask dev server port
         'http://127.0.0.1:5173',  # Vite dev server port
         # Add your production frontend URL here when deploying:
-        # 'https://your-frontend-app.onrender.com',
+        'https://easyaccomodation-frontend.onrender.com',
     ]
     
+    # Mail settings
+    MAIL_PASSWORD = os.environ.get('SENDGRID_API_KEY')
+    MAIL_DEFAULT_SENDER = os.environ.get('FROM_EMAIL')
+    ADMIN_REGISTRATION_SECRET = os.environ.get('ADMIN_REGISTRATION_SECRET')
+
     @staticmethod
     def init_app(app):
         """
