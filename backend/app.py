@@ -13,7 +13,7 @@ This file:
 """
 
 import os
-from flask import Flask, jsonify, send_from_directory
+from flask import Flask, jsonify, send_from_directory, request, redirect
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from config import config
@@ -203,6 +203,25 @@ def register_blueprints(app):
         """Serve static files like house images"""
         static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
         return send_from_directory(static_dir, filename)
+
+    # Support direct verification links that point to the backend
+    # If an email contains a link to /verify-email?token=..., redirect the user
+    # to the frontend's verify page so the SPA can handle the token.
+    @app.route('/verify-email')
+    def verify_email_redirect():
+        token = request.args.get('token')
+        frontend_base = app.config.get('FRONTEND_BASE_URL') or None
+        if token and frontend_base:
+            target = frontend_base.rstrip('/') + f"/verify-email?token={token}"
+            return redirect(target, code=302)
+        # If no frontend base configured, show a helpful JSON response
+        if token:
+            return jsonify({
+                'success': True,
+                'message': 'Token received. Please open the frontend app and navigate to /verify-email?token=<token> to complete verification.',
+                'token': token
+            }), 200
+        return jsonify({'success': False, 'message': 'No token provided'}), 400
 
 
 def register_error_handlers(app):
