@@ -168,6 +168,25 @@ def register_blueprints(app):
                 'admin': '/api/admin',
             }
         })
+
+    # Helpful API root so visiting /api doesn't 404
+    @app.route('/api')
+    def api_root():
+        return jsonify({
+            'success': True,
+            'message': 'EasyAccommodation API root',
+            'version': '1.0.0',
+            'endpoints': {
+                'health': '/api/health',
+                'auth': '/api/auth',
+                'houses': '/api/houses',
+                'bookings': '/api/bookings',
+                'admin': '/api/admin',
+                'owner': '/api/owner',
+                'payments': '/api/payments',
+                'payment_proofs': '/api/payment-proofs',
+            }
+        })
     
     @app.route('/api/health')
     def health_check():
