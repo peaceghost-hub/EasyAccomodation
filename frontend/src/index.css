@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 text-gray-900;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Button Styles */
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-md;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-blue-700 border-2 border-blue-200 hover:bg-blue-50 hover:border-blue-300;
+  }
+  
+  .btn-ghost {
+    @apply text-blue-600 hover:bg-blue-50 hover:text-blue-700;
+  }
+  
+  /* Input Styles */
+  .input {
+    @apply w-full px-4 py-3 border-2 border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-all duration-200;
+  }
+  
+  .input:focus {
+    @apply shadow-lg;
+  }
+  
+  /* Card Styles */
+  .card {
+    @apply bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-6 border border-blue-100;
+  }
+  
+  /* House Pattern Background */
+  .house-pattern-bg {
+    background-image: 
+      linear-gradient(to bottom, rgba(239, 246, 255, 0.9), rgba(219, 234, 254, 0.95)),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233b82f6' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  /* Gradient Overlays */
+  .gradient-overlay {
+    @apply absolute inset-0 bg-gradient-to-br from-blue-600/10 via-indigo-500/5 to-sky-600/10 pointer-events-none;
+  }
+  
+  /* Glass Effect */
+  .glass {
+    @apply bg-white/80 backdrop-blur-md border border-white/50 shadow-xl;
+  }
+  
+  /* Animated Background */
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+  
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  /* Hero Section Styles */
+  .hero-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 50%, #4f46e5 100%);
+  }
+  
+  /* Stat Cards */
+  .stat-card {
+    @apply bg-gradient-to-br from-white to-blue-50 rounded-xl p-6 shadow-lg border border-blue-100 transform transition-all duration-300 hover:scale-105 hover:shadow-2xl;
+  }
+}

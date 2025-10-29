@@ -1,0 +1,15 @@
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MTEyMzQzNSwianRpIjoiNDdmNWExZTQtODEyZS00YWZkLWJkZmMtZGFiMWNmNjNmNDg3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MiwibmJmIjoxNzYxMTIzNDM1LCJleHAiOjE3NjEyMDk4MzV9.r6rBIMe39nJKdBxNoSwNWjz0MuJLtUm-YmjO4U3Uqjc",
+  "message": "Login successful",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2MTEyMzQzNSwianRpIjoiYTFiZmVkYzUtNDYzZi00YzlkLWJiNzYtMDMwOWQxYzE5MjQyIiwidHlwZSI6InJlZnJlc2giLCJzdWIiOjIsIm5iZiI6MTc2MTEyMzQzNSwiZXhwIjoxNzYzNzE1NDM1fQ.I5VmxpFWRh32mEw6ond8V4_d4s6bPVfdhdnCEw_0leM",
+  "success": true,
+  "user": {
+    "created_at": "2025-10-21T19:06:52.209761",
+    "email": "magomobenam765@gmail.com",
+    "full_name": "Benam Magomo",
+    "id": 2,
+    "is_active": true,
+    "phone_number": "+263787690803",
+    "user_type": "admin"
+  }
+}
