@@ -74,8 +74,8 @@ class Config:
     # EMAIL SETTINGS (SendGrid)
     # --------------------------------------------
     SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
-    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@easyaccommodation.com')
-    FROM_EMAIL = os.getenv('FROM_EMAIL', 'noreply@easyaccommodation.com')
+    ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'magomobenam765@gmail.com')
+    FROM_EMAIL = os.getenv('FROM_EMAIL', 'magomobenam765@gmail.com')
     # Public frontend base url used in email links (e.g. https://app.example.com)
     FRONTEND_BASE_URL = os.getenv('FRONTEND_BASE_URL')
     
