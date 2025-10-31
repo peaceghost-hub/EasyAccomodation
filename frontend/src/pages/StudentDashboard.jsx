@@ -146,7 +146,8 @@ export default function StudentDashboard() {
       const r = await bookingAPI.myBookings();
       setMyBookings(r.data.bookings || []);
     } catch (e) {
-      setMessage(e.response?.data?.message || 'Failed to cancel booking');
+      console.error('Student cancel error:', e?.response || e);
+      setMessage(e.response?.data?.message || e.message || 'Failed to cancel booking');
     }
   };
 

@@ -30,7 +30,11 @@ export const bookingAPI = {
   confirmBooking: (data) => api.post('/bookings/confirm', data),
   myBookings: () => api.get('/bookings/my-bookings'),
   myInquiries: () => api.get('/bookings/inquiries'),
-  cancelBooking: (id, reason) => api.put(`/bookings/${id}/cancel`, { reason }),
+  // Accept either a reason string or an object payload
+  cancelBooking: (id, reason) => {
+    const payload = typeof reason === 'string' ? { reason } : (reason || {});
+    return api.put(`/bookings/${id}/cancel`, payload);
+  },
   cancelInquiry: (id) => api.put(`/bookings/inquiries/${id}/cancel`),
 };
 
@@ -42,7 +46,13 @@ export const ownerAPI = {
   claimHouse: (houseId, data) => api.post(`/houses/${houseId}/claim`, data),
   getMyHouseBookings: () => api.get('/owner/house/bookings'),
   acceptBooking: (id, data) => api.put(`/owner/bookings/${id}/accept`, data || {}),
-  cancelBooking: (id, data) => api.put(`/owner/bookings/${id}/cancel`, data || {}),
+  // Owner cancel: accept string or object, map string -> { message }
+  cancelBooking: (id, data) => {
+    let payload = {};
+    if (typeof data === 'string') payload = { message: data };
+    else if (data && typeof data === 'object') payload = data;
+    return api.put(`/owner/bookings/${id}/cancel`, payload);
+  },
   deleteBooking: (id) => api.delete(`/owner/bookings/${id}`),
   verifyInquiry: (id, response) => api.put(`/owner/inquiries/${id}/verify`, response ? { response } : {}),
   cancelInquiry: (id) => api.put(`/owner/inquiries/${id}/cancel`),

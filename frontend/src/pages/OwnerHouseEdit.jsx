@@ -223,9 +223,10 @@ export default function OwnerHouseEdit() {
     try {
       await ownerAPI.acceptBooking(booking.id);
       setActionMessage('Booking accepted');
-      refreshOwnerCollections();
+      await refreshOwnerCollections();
     } catch (e) {
-      setActionMessage(e.response?.data?.message || 'Failed to accept booking');
+      console.error('Accept booking error:', e?.response || e);
+      setActionMessage(e.response?.data?.message || e.message || 'Failed to accept booking');
     }
   };
 
@@ -239,9 +240,10 @@ export default function OwnerHouseEdit() {
       }
       await ownerAPI.cancelBooking(booking.id, payload);
       setActionMessage('Booking cancelled');
-      refreshOwnerCollections();
+      await refreshOwnerCollections();
     } catch (e) {
-      setActionMessage(e.response?.data?.message || 'Failed to cancel booking');
+      console.error('Owner cancel error:', e?.response || e);
+      setActionMessage(e.response?.data?.message || e.message || 'Failed to cancel booking');
     }
   };
 
@@ -250,9 +252,10 @@ export default function OwnerHouseEdit() {
     try {
       await ownerAPI.deleteBooking(booking.id);
       setActionMessage('Booking deleted');
-      refreshOwnerCollections();
+      await refreshOwnerCollections();
     } catch (e) {
-      setActionMessage(e.response?.data?.message || 'Failed to delete booking');
+      console.error('Owner delete error:', e?.response || e);
+      setActionMessage(e.response?.data?.message || e.message || 'Failed to delete booking');
     }
   };
 
