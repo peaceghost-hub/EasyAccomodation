@@ -15,6 +15,19 @@ export default function HouseDetail() {
   const mapRef = useRef(null);
   const [campusSelection, setCampusSelection] = useState('main'); // 'main' | 'telone' | 'batanai' | 'all'
   const { isAuthenticated, user } = useAuth();
+  const [inquiryState, setInquiryState] = useState('idle'); // idle | loading | success | error
+
+  const inquiryDisabled = inquiryState === 'loading' || inquiryState === 'success';
+  const inquiryButtonLabel = inquiryState === 'success' ? 'Inquiry Sent' : inquiryState === 'loading' ? 'Sending…' : 'Inquire About Availability';
+  const inquiryButtonClasses = `inline-flex items-center justify-center gap-2 text-base py-3 px-6 rounded-md font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2
+    ${inquiryState === 'success'
+      ? 'bg-green-600 text-white border border-green-600 cursor-default focus:ring-green-500'
+      : inquiryState === 'loading'
+        ? 'bg-blue-400 text-white border border-blue-400 cursor-wait focus:ring-blue-400'
+        : inquiryState === 'error'
+          ? 'bg-red-600 text-white border border-red-600 hover:bg-red-700 focus:ring-red-500'
+          : 'bg-white text-blue-700 border border-blue-300 hover:bg-blue-50 focus:ring-blue-500'
+    }`;
 
   useEffect(() => {
     const fetch = async () => {
@@ -38,18 +51,27 @@ export default function HouseDetail() {
   }, [id]);
 
   const handleInquiry = async () => {
+    if (inquiryDisabled) return;
     if (!isAuthenticated || user.user_type !== 'student') {
       setMessage('You must be logged in as a student to send an inquiry');
       return;
     }
 
+    setInquiryState('loading');
     try {
       const res = await bookingAPI.sendInquiry({ house_id: house.id, message: 'I am interested in this room.' });
       setMessage(res.data.message || 'Inquiry sent');
+      setInquiryState('success');
     } catch (e) {
       setMessage(e.response?.data?.message || 'Failed to send inquiry');
+      setInquiryState('error');
     }
   };
+
+  useEffect(() => {
+    // Reset inquiry state when navigating to a different house
+    setInquiryState('idle');
+  }, [house?.id]);
 
   const handleReserve = async () => {
     if (!isAuthenticated || user.user_type !== 'student') {
@@ -472,12 +494,14 @@ export default function HouseDetail() {
               <div className="mt-8 flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleInquiry}
-                  className="btn btn-secondary inline-flex items-center justify-center gap-2 text-base py-3 px-6"
+                  className={inquiryButtonClasses}
+                  disabled={inquiryDisabled}
+                  type="button"
                 >
                   <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                   </svg>
-                  Inquire About Availability
+                  {inquiryButtonLabel}
                 </button>
                 <button
                   onClick={handleReserve}

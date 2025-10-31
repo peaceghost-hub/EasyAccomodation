@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { bookingAPI, paymentProofAPI, authAPI, houseAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,8 +15,46 @@ export default function StudentDashboard() {
   const [myBookings, setMyBookings] = useState([]);
   const [myInquiries, setMyInquiries] = useState([]);
   const [sortByClosest, setSortByClosest] = useState(true);
+  const [uploadState, setUploadState] = useState('idle'); // idle | loading | success | error
   const { isAuthenticated, isStudent, user } = useAuth();
   const navigate = useNavigate();
+  const proofInputRef = useRef(null);
+
+  const uploadDisabled = uploadState === 'loading' || uploadState === 'success';
+  const uploadButtonLabel = uploadState === 'success' ? 'Uploaded' : uploadState === 'loading' ? 'Uploading…' : 'Upload';
+  const uploadButtonClasses = `inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2
+    ${uploadState === 'success'
+      ? 'bg-green-600 text-white border border-green-600 focus:ring-green-500 cursor-default'
+      : uploadState === 'loading'
+        ? 'bg-blue-400 text-white border border-blue-400 cursor-wait focus:ring-blue-400'
+        : uploadState === 'error'
+          ? 'bg-red-600 text-white border border-red-600 hover:bg-red-700 focus:ring-red-500'
+          : 'bg-blue-600 text-white border border-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+    }`;
+
+  const handleUploadProof = async () => {
+    if (uploadDisabled) return;
+    const input = proofInputRef.current;
+    if (!input || !input.files || input.files.length === 0) {
+      setMessage('Select a file to upload');
+      return;
+    }
+
+    const file = input.files[0];
+    const fd = new FormData();
+    fd.append('proof', file);
+
+    setUploadState('loading');
+    try {
+      await paymentProofAPI.uploadProof(fd);
+      setMessage('Proof uploaded — awaiting admin review');
+      setUploadState('success');
+      if (input) input.value = '';
+    } catch (e) {
+      setMessage(e.response?.data?.message || 'Upload failed');
+      setUploadState('error');
+    }
+  };
   
   // Check if student is verified
   const isVerified = user && user.admin_verified;
@@ -466,21 +504,25 @@ export default function StudentDashboard() {
                   A subscription to access the app is $5. Please pay via Ecocash to <strong>0787690803 (Benam Magomo)</strong> or
                   bank account <strong>263787690803840</strong>. After payment, upload a photo or screenshot of the payment here and the admin will review it.
                 </div>
-                <div className="flex items-center gap-3">
-                  <input type="file" id="proofFile" className="" />
-                  <button className="btn btn-primary" onClick={async () => {
-                    const input = document.getElementById('proofFile');
-                    if (!input || !input.files || input.files.length === 0) return setMessage('Select a file to upload');
-                    const f = input.files[0];
-                    const fd = new FormData();
-                    fd.append('proof', f);
-                    try {
-                      const res = await paymentProofAPI.uploadProof(fd);
-                      setMessage('Proof uploaded — awaiting admin review');
-                    } catch (e) {
-                      setMessage(e.response?.data?.message || 'Upload failed');
-                    }
-                  }}>Upload</button>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <input
+                    type="file"
+                    ref={proofInputRef}
+                    onChange={() => {
+                      // Reset state when a new file is chosen so students can upload a replacement if needed
+                      setUploadState('idle');
+                    }}
+                    className="text-sm"
+                    disabled={uploadState === 'loading'}
+                  />
+                  <button
+                    type="button"
+                    className={uploadButtonClasses}
+                    onClick={handleUploadProof}
+                    disabled={uploadDisabled}
+                  >
+                    {uploadButtonLabel}
+                  </button>
                 </div>
               </section>
               <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
