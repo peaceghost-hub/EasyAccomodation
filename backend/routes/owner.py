@@ -387,7 +387,7 @@ def cancel_booking(booking_id):
         payload = request.get_json() or {}
         booking.owner_status = 'cancelled'
         booking.booking_type = 'cancelled'
-        booking.cancellation_reason = payload.get('reason', 'Cancelled by house owner')
+        booking.cancellation_reason = payload.get('message', 'Cancelled by house owner')
         if 'message' in payload:
             booking.owner_response = payload.get('message')
         booking.owner_response_date = datetime.utcnow()

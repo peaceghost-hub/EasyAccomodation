@@ -378,6 +378,8 @@ def cancel_booking(booking_id):
                 'message': 'Booking is already cancelled'
             }), 400
         
+        payload = request.get_json() or {}
+        
         # Free up the room if it was occupied
         room = booking.room
         if room:
@@ -392,12 +394,16 @@ def cancel_booking(booking_id):
             except Exception:
                 pass
 
-        db.session.delete(booking)
+        booking.booking_type = 'cancelled'
+        booking.cancellation_reason = payload.get('reason', 'Cancelled by student')
+        booking.owner_response_date = datetime.utcnow()  # or something, but maybe not needed
+
         db.session.commit()
         
         return jsonify({
             'success': True,
-            'message': 'Booking cancelled and removed'
+            'message': 'Booking cancelled',
+            'booking': booking.to_dict(include_student_details=True, include_house_details=True)
         }), 200
         
     except Exception as e:

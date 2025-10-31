@@ -553,6 +553,7 @@ export default function StudentDashboard() {
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Date</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Booking Status</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Owner Decision</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Message</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
                         </tr>
                       </thead>
@@ -591,6 +592,9 @@ export default function StudentDashboard() {
                             </td>
                             <td className="px-3 py-2 text-sm">
                               <span className={ownerStatusClass}>{ownerStatusLabel}</span>
+                            </td>
+                            <td className="px-3 py-2 text-sm text-gray-600">
+                              {b.owner_response || b.cancellation_reason || '—'}
                             </td>
                             <td className="px-3 py-2 text-right">
                               {canCancel ? (

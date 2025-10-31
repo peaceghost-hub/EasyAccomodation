@@ -235,7 +235,7 @@ export default function OwnerHouseEdit() {
     try {
       const reason = prompt('Optional reason to share with the student:');
       if (reason) {
-        payload = { reason };
+        payload = { message: reason };
       }
       await ownerAPI.cancelBooking(booking.id, payload);
       setActionMessage('Booking cancelled');
