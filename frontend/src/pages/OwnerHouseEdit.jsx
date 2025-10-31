@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api, { ownerAPI, ownerUpload } from '../services/api';
 import axios from 'axios';
+import ActionMenu from '../components/common/ActionMenu';
 
 // include is_occupied by default for new rooms
 const emptyRoom = () => ({ room_number: '', capacity: 1, price_per_month: 0, is_available: true, is_occupied: false });
@@ -641,30 +642,22 @@ export default function OwnerHouseEdit() {
                       </div>
                       <div className="text-right text-sm text-gray-500">
                         <div className="mb-3">{new Date(iq.created_at).toLocaleString()}</div>
-                        <div className="flex flex-col gap-2">
-                          {iq.status !== 'verified' && (
-                            <button 
-                              className="px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs font-medium transition-colors shadow-sm" 
-                              onClick={() => verifyInquiry(iq)}
-                            >
-                              ✓ Verify
-                            </button>
-                          )}
-                          {iq.status !== 'cancelled' && (
-                            <button 
-                              className="px-3 py-1.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-xs font-medium transition-colors shadow-sm" 
-                              onClick={() => cancelInquiry(iq)}
-                            >
-                              ✕ Cancel
-                            </button>
-                          )}
-                          <button 
-                            className="px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 text-xs font-medium transition-colors shadow-sm" 
-                            onClick={() => deleteInquiry(iq)}
-                          >
-                            🗑️ Delete
-                          </button>
-                        </div>
+                        <ActionMenu
+                          align="right"
+                          items={[
+                            ...(iq.status !== 'verified'
+                              ? [{ label: 'Mark as Verified', onClick: () => verifyInquiry(iq) }]
+                              : []),
+                            ...(iq.status !== 'cancelled'
+                              ? [{ label: 'Cancel Inquiry', onClick: () => cancelInquiry(iq) }]
+                              : []),
+                            {
+                              label: 'Delete Inquiry',
+                              onClick: () => deleteInquiry(iq),
+                              danger: true,
+                            },
+                          ]}
+                        />
                       </div>
                     </div>
                   </div>

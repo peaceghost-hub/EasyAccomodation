@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { adminAPI } from '../services/api';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import ActionMenu from '../components/common/ActionMenu';
 
 export default function AdminDashboard() {
   const [houses, setHouses] = useState([]);
@@ -564,33 +565,30 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex flex-wrap items-center justify-end gap-2">
-                      {u.house && (
-                        <button
-                          onClick={() => handleUnassignOwner(u.house.id)}
-                          className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                        >
-                          Unassign House
-                        </button>
-                      )}
-                      <button
-                        onClick={() => handleShowOwnerHouses(u)}
-                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        View Houses
-                      </button>
-                      <button
-                        onClick={() => handleDeleteOwner(u)}
-                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      >
-                        Remove Owner
-                      </button>
-                      <button
-                        onClick={() => openEditUser(u.id)}
-                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Edit
-                      </button>
+                    <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex justify-end">
+                      <ActionMenu
+                        items={[
+                          ...(u.house
+                            ? [{
+                                label: 'Unassign House',
+                                onClick: () => handleUnassignOwner(u.house.id),
+                              }]
+                            : []),
+                          {
+                            label: 'View Houses',
+                            onClick: () => handleShowOwnerHouses(u),
+                          },
+                          {
+                            label: 'Remove Owner',
+                            onClick: () => handleDeleteOwner(u),
+                            danger: true,
+                          },
+                          {
+                            label: 'Edit Details',
+                            onClick: () => openEditUser(u.id),
+                          },
+                        ]}
+                      />
                     </div>
                   </div>
                 </div>
@@ -616,29 +614,26 @@ export default function AdminDashboard() {
                       <div className="font-medium">{item.student.full_name || item.student.email}</div>
                       <div className="text-xs text-gray-500">Uploaded: {new Date(item.proof.uploaded_at).toLocaleString()}</div>
                     </div>
-                    <div className="flex flex-wrap gap-2 justify-end">
-                      <a
-                        href={item.view_url_full || item.view_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full sm:w-auto px-3 py-1.5 bg-white border rounded text-sm text-center"
-                      >
-                        View
-                      </a>
-                      <button
-                        onClick={() => setProofModal({ open: true, proof: item })}
-                        className="w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white rounded text-sm"
-                      >
-                        Review
-                      </button>
-                      <button
-                        onClick={() => deleteProof(item.proof.id)}
-                        className="w-full sm:w-auto px-3 py-1.5 bg-red-600 text-white rounded text-sm"
-                        title="Delete this payment proof"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <ActionMenu
+                      items={[
+                        {
+                          label: 'View Proof',
+                          onClick: () => {
+                            const url = item.view_url_full || item.view_url;
+                            if (url) window.open(url, '_blank', 'noopener');
+                          },
+                        },
+                        {
+                          label: 'Review Proof',
+                          onClick: () => setProofModal({ open: true, proof: item }),
+                        },
+                        {
+                          label: 'Delete Proof',
+                          onClick: () => deleteProof(item.proof.id),
+                          danger: true,
+                        },
+                      ]}
+                    />
                   </div>
                 ))}
               </div>
@@ -748,30 +743,28 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                         </div>
-                        <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex flex-wrap items-center justify-end gap-2">
-                          <button
-                            onClick={() => navigate(`/houses/${h.id}`)}
-                            className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                          >
-                            View Details
-                          </button>
-                          {h.owner && (
-                            <button
-                              onClick={() => handleUnassignOwner(h.id)}
-                              className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-                            >
-                              Unassign Owner
-                            </button>
-                          )}
-                          <button
-                            onClick={async () => {
-                              // Use centralized handler so we can surface a force-delete modal
-                              await handleDeleteHouse(h);
-                            }}
-                            className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          >
-                            Delete
-                          </button>
+                        <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex justify-end">
+                          <ActionMenu
+                            items={[
+                              {
+                                label: 'View Details',
+                                onClick: () => navigate(`/houses/${h.id}`),
+                              },
+                              ...(h.owner
+                                ? [{
+                                    label: 'Unassign Owner',
+                                    onClick: () => handleUnassignOwner(h.id),
+                                  }]
+                                : []),
+                              {
+                                label: 'Delete',
+                                onClick: async () => {
+                                  await handleDeleteHouse(h);
+                                },
+                                danger: true,
+                              },
+                            ]}
+                          />
                         </div>
                       </div>
                     </div>
@@ -844,30 +837,24 @@ export default function AdminDashboard() {
                         </div>
                       </button>
                     </div>
-                    <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex flex-wrap items-center justify-end gap-2">
-                      <button
-                        onClick={() => toggleVerification(student.student_record_id)}
-                        className={`flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
-                          student.admin_verified
-                            ? 'border-yellow-300 text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:ring-yellow-500'
-                            : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'
-                        }`}
-                        title={student.admin_verified ? 'Mark as unverified' : 'Mark as verified'}
-                      >
-                        {student.admin_verified ? '✗ Unverify' : '✓ Verify'}
-                      </button>
-                      <button
-                        onClick={() => handleDeleteStudent(student)}
-                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                      >
-                        Delete
-                      </button>
-                      <button
-                        onClick={() => openEditUser(student.user_id)}
-                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                      >
-                        Edit
-                      </button>
+                    <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex justify-end">
+                      <ActionMenu
+                        items={[
+                          {
+                            label: student.admin_verified ? 'Mark as Unverified' : 'Mark as Verified',
+                            onClick: () => toggleVerification(student.student_record_id),
+                          },
+                          {
+                            label: 'Delete Student',
+                            onClick: () => handleDeleteStudent(student),
+                            danger: true,
+                          },
+                          {
+                            label: 'Edit Details',
+                            onClick: () => openEditUser(student.user_id),
+                          },
+                        ]}
+                      />
                     </div>
                   </div>
 
