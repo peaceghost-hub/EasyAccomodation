@@ -33,8 +33,8 @@ export default function HousesByArea() {
               <div key={h.id} className="card p-4">
                 <h4 className="font-medium">{h.house_number} {h.street_address}</h4>
                 <p className="text-sm text-gray-600">Rooms: {h.total_rooms} — Available: {h.available_rooms}</p>
-                <div className="mt-3 flex space-x-2">
-                  <Link to={`/houses/${h.id}`} className="btn btn-primary text-sm">View</Link>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link to={`/houses/${h.id}`} className="btn btn-primary text-sm w-full sm:w-auto text-center">View</Link>
                 </div>
               </div>
             ))}

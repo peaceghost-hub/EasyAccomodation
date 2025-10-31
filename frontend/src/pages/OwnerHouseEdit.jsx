@@ -227,7 +227,7 @@ export default function OwnerHouseEdit() {
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2">
             Edit My House
           </h2>
-          <div className="mb-4 flex items-center space-x-3">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
             <div className="font-medium text-gray-800 text-lg">
               {house.house_number} {house.street_address}
             </div>

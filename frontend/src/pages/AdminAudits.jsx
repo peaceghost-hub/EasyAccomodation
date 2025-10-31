@@ -78,11 +78,11 @@ export default function AdminAudits() {
         </table>
       </div>
 
-      <div className="flex items-center justify-between mt-4">
-        <div className="text-sm">{Math.min((page-1)*perPage+1, total)} - {Math.min(page*perPage, total)} of {total}</div>
-        <div className="space-x-2">
-          <button onClick={prevPage} disabled={page <= 1} className="btn btn-sm">Prev</button>
-          <button onClick={nextPage} disabled={page * perPage >= total} className="btn btn-sm">Next</button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+        <div className="text-sm text-center sm:text-left">{Math.min((page-1)*perPage+1, total)} - {Math.min(page*perPage, total)} of {total}</div>
+        <div className="flex flex-wrap gap-2 justify-center sm:justify-end">
+          <button onClick={prevPage} disabled={page <= 1} className="btn btn-sm w-full sm:w-auto">Prev</button>
+          <button onClick={nextPage} disabled={page * perPage >= total} className="btn btn-sm w-full sm:w-auto">Next</button>
         </div>
       </div>
     </div>

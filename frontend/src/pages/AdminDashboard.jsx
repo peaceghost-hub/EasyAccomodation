@@ -447,7 +447,7 @@ export default function AdminDashboard() {
 
         {/* Search Bar */}
         <div className="mb-6 glass rounded-xl p-4 shadow-lg border-2 border-blue-100">
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="flex-1 relative">
               <input
                 type="text"
@@ -457,7 +457,7 @@ export default function AdminDashboard() {
                 className="input w-full"
               />
             </div>
-            <button onClick={() => setSearchQuery('')} className="btn btn-secondary">
+            <button onClick={() => setSearchQuery('')} className="btn btn-secondary w-full sm:w-auto">
               ✕ Clear
             </button>
           </div>
@@ -564,30 +564,30 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    <div className="ml-4 flex items-center space-x-3">
+                    <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex flex-wrap items-center justify-end gap-2">
                       {u.house && (
                         <button
                           onClick={() => handleUnassignOwner(u.house.id)}
-                          className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                          className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                         >
                           Unassign House
                         </button>
                       )}
                       <button
                         onClick={() => handleShowOwnerHouses(u)}
-                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
                       >
                         View Houses
                       </button>
                       <button
                         onClick={() => handleDeleteOwner(u)}
-                        className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                       >
                         Remove Owner
                       </button>
                       <button
                         onClick={() => openEditUser(u.id)}
-                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
                       >
                         Edit
                       </button>
@@ -616,12 +616,24 @@ export default function AdminDashboard() {
                       <div className="font-medium">{item.student.full_name || item.student.email}</div>
                       <div className="text-xs text-gray-500">Uploaded: {new Date(item.proof.uploaded_at).toLocaleString()}</div>
                     </div>
-                    <div className="flex gap-2">
-                      <a href={item.view_url_full || item.view_url} target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 bg-white border rounded text-sm">View</a>
-                      <button onClick={() => setProofModal({ open: true, proof: item })} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm">Review</button>
-                      <button 
-                        onClick={() => deleteProof(item.proof.id)} 
-                        className="px-3 py-1.5 bg-red-600 text-white rounded text-sm"
+                    <div className="flex flex-wrap gap-2 justify-end">
+                      <a
+                        href={item.view_url_full || item.view_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full sm:w-auto px-3 py-1.5 bg-white border rounded text-sm text-center"
+                      >
+                        View
+                      </a>
+                      <button
+                        onClick={() => setProofModal({ open: true, proof: item })}
+                        className="w-full sm:w-auto px-3 py-1.5 bg-blue-600 text-white rounded text-sm"
+                      >
+                        Review
+                      </button>
+                      <button
+                        onClick={() => deleteProof(item.proof.id)}
+                        className="w-full sm:w-auto px-3 py-1.5 bg-red-600 text-white rounded text-sm"
                         title="Delete this payment proof"
                       >
                         Delete
@@ -637,11 +649,11 @@ export default function AdminDashboard() {
         <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">Houses</h2>
-            <div className="flex items-center space-x-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               <button
                 onClick={handleBulkEdit}
                 disabled={selected.size === 0}
-                className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                className={`flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   selected.size === 0
                     ? 'border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed'
                     : 'border-orange-300 text-orange-700 bg-white hover:bg-orange-50 focus:ring-orange-500'
@@ -655,7 +667,7 @@ export default function AdminDashboard() {
               <button
                 onClick={handleBulkDelete}
                 disabled={selected.size === 0}
-                className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                className={`flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                   selected.size === 0
                     ? 'border-gray-300 text-gray-400 bg-gray-50 cursor-not-allowed'
                     : 'border-red-300 text-red-700 bg-white hover:bg-red-50 focus:ring-red-500'
@@ -736,17 +748,17 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                         </div>
-                        <div className="ml-4 flex items-center space-x-3">
+                        <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex flex-wrap items-center justify-end gap-2">
                           <button
                             onClick={() => navigate(`/houses/${h.id}`)}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                            className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                           >
                             View Details
                           </button>
                           {h.owner && (
                             <button
                               onClick={() => handleUnassignOwner(h.id)}
-                              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                              className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                             >
                               Unassign Owner
                             </button>
@@ -756,7 +768,7 @@ export default function AdminDashboard() {
                               // Use centralized handler so we can surface a force-delete modal
                               await handleDeleteHouse(h);
                             }}
-                            className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           >
                             Delete
                           </button>
@@ -832,10 +844,10 @@ export default function AdminDashboard() {
                         </div>
                       </button>
                     </div>
-                    <div className="ml-4 flex items-center space-x-3">
+                    <div className="ml-0 sm:ml-4 mt-3 sm:mt-0 flex flex-wrap items-center justify-end gap-2">
                       <button
                         onClick={() => toggleVerification(student.student_record_id)}
-                        className={`inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+                        className={`flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded focus:outline-none focus:ring-2 focus:ring-offset-2 ${
                           student.admin_verified
                             ? 'border-yellow-300 text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:ring-yellow-500'
                             : 'border-green-300 text-green-700 bg-green-50 hover:bg-green-100 focus:ring-green-500'
@@ -846,13 +858,13 @@ export default function AdminDashboard() {
                       </button>
                       <button
                         onClick={() => handleDeleteStudent(student)}
-                        className="inline-flex items-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-red-300 shadow-sm text-sm font-medium rounded text-red-700 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                       >
                         Delete
                       </button>
                       <button
                         onClick={() => openEditUser(student.user_id)}
-                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                        className="flex w-full sm:w-auto items-center justify-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
                       >
                         Edit
                       </button>

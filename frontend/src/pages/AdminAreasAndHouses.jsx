@@ -391,11 +391,11 @@ export default function AdminAreasAndHouses() {
 
         <div className="mt-3">
           <h4 className="font-medium">Rooms</h4>
-          <div className="flex space-x-2 mt-2">
-            <input className="input" placeholder="Room #" value={roomInput.room_number} onChange={e => setRoomInput({ ...roomInput, room_number: e.target.value })} />
-            <input className="input" placeholder="Capacity" value={roomInput.capacity} onChange={e => setRoomInput({ ...roomInput, capacity: Number(e.target.value) })} />
-            <input className="input" placeholder="Price" value={roomInput.price_per_month} onChange={e => setRoomInput({ ...roomInput, price_per_month: Number(e.target.value) })} />
-            <button className="btn btn-secondary" onClick={addRoomToHouse}>Add Room</button>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <input className="input flex-1 min-w-[140px]" placeholder="Room #" value={roomInput.room_number} onChange={e => setRoomInput({ ...roomInput, room_number: e.target.value })} />
+            <input className="input flex-1 min-w-[140px]" placeholder="Capacity" value={roomInput.capacity} onChange={e => setRoomInput({ ...roomInput, capacity: Number(e.target.value) })} />
+            <input className="input flex-1 min-w-[140px]" placeholder="Price" value={roomInput.price_per_month} onChange={e => setRoomInput({ ...roomInput, price_per_month: Number(e.target.value) })} />
+            <button className="btn btn-secondary w-full sm:w-auto" onClick={addRoomToHouse}>Add Room</button>
           </div>
           <ul className="mt-2">
             {houseData.rooms.map((r, i) => (<li key={i} className="text-sm">{r.room_number} - {r.capacity} - {r.price_per_month}</li>))}
