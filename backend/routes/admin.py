@@ -26,10 +26,21 @@ from datetime import datetime, timedelta
 import os
 from werkzeug.utils import secure_filename
 import math
-from models import db, User, Student, ResidentialArea, House, Room, HouseOwner, SubscriptionPayment
+from models import (
+    db,
+    User,
+    Student,
+    ResidentialArea,
+    House,
+    Room,
+    HouseOwner,
+    SubscriptionPayment,
+    Booking,
+    BookingInquiry,
+    PaymentProof,
+)
 from models import AdminAudit
 from utils.email_utils import send_admin_created_email
-from models import PaymentProof
 from utils.email_utils import send_student_verified_email, send_payment_proof_rejected_email
 from config import Config
 
@@ -871,16 +882,27 @@ def delete_user(user_id):
         if user.user_type == 'admin':
             return jsonify({'success': False, 'message': 'Cannot delete admin users'}), 400
 
-        # If user is a house owner, unassign their house and remove owner_profile
+        # If user is a house owner, unassign their houses and remove owner_profile
         if user.user_type == 'house_owner':
-            if user.owned_house:
-                user.owned_house.owner_id = None
+            houses = House.query.filter_by(owner_id=user.id).all()
+            for house in houses:
+                house.owner_id = None
+                house.is_claimed = False
+                house.owner_name = None
+                house.owner_email = None
+                house.owner_phone = None
             if hasattr(user, 'owner_profile') and user.owner_profile:
                 db.session.delete(user.owner_profile)
 
-        # If student, delete student profile as well
-        if user.user_type == 'student' and hasattr(user, 'student_profile') and user.student_profile:
-            db.session.delete(user.student_profile)
+        # If student, remove associated records and profile before deleting user
+        if user.user_type == 'student':
+            Booking.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+            BookingInquiry.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+            if hasattr(user, 'student_profile') and user.student_profile:
+                db.session.delete(user.student_profile)
+
+        # Remove any pending payment proofs tied to this user
+        PaymentProof.query.filter_by(user_id=user.id).delete(synchronize_session=False)
 
         db.session.delete(user)
         db.session.commit()
@@ -1469,7 +1491,15 @@ def delete_payment_proof(proof_id):
 def get_students():
     """Get all students with verification status"""
     try:
-        students = Student.query.join(User).filter(User.is_active == True).all()
+        query = Student.query.join(User)
+
+        is_active_filter = request.args.get('is_active')
+        if is_active_filter == 'true':
+            query = query.filter(User.is_active.is_(True))
+        elif is_active_filter == 'false':
+            query = query.filter(User.is_active.is_(False))
+
+        students = query.all()
         
         students_data = []
         for s in students:

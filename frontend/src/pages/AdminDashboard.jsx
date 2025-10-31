@@ -11,8 +11,6 @@ export default function AdminDashboard() {
   const [students, setStudents] = useState([]);
   const [createdAdmins, setCreatedAdmins] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
-  const [deleteModal, setDeleteModal] = useState({ open: false, student: null });
-  const [ownerDeleteModal, setOwnerDeleteModal] = useState({ open: false, owner: null });
   const [adminDeleteModal, setAdminDeleteModal] = useState({ open: false, admin: null });
   const [selected, setSelected] = useState(new Set());
   const [selectAll, setSelectAll] = useState(false);
@@ -140,9 +138,12 @@ export default function AdminDashboard() {
     try {
       const response = await adminAPI.getStudentsWithVerification();
       if (response.data && response.data.students) {
-        // Only show active students in the admin list by default
-        const activeStudents = response.data.students.filter(s => s.is_active !== false);
-        setStudents(activeStudents);
+        const studentsList = [...response.data.students].sort((a, b) => {
+          const aActive = a.is_active !== false ? 1 : 0;
+          const bActive = b.is_active !== false ? 1 : 0;
+          return bActive - aActive;
+        });
+        setStudents(studentsList);
       }
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to load students');
@@ -287,32 +288,38 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteOwner = (owner) => {
-    // Open modal to choose Deactivate vs Permanent delete
-    setOwnerDeleteModal({ open: true, owner });
-  };
-
-  const confirmDeactivateOwner = async () => {
-    const owner = ownerDeleteModal.owner;
+  const deactivateOwnerAccount = async (owner) => {
     if (!owner) return;
+    const name = owner.full_name || owner.email;
+    if (!confirm(`Deactivate ${name}? They will lose access but data will remain.`)) return;
     try {
       await adminAPI.deactivateUser(owner.id);
-      setMessage('Owner deactivated');
-      setOwnerDeleteModal({ open: false, owner: null });
-      loadData();
+      setMessage('Owner account deactivated');
+      await loadData();
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to deactivate owner');
     }
   };
 
-  const confirmPermanentDeleteOwner = async () => {
-    const owner = ownerDeleteModal.owner;
+  const reactivateOwnerAccount = async (owner) => {
     if (!owner) return;
+    try {
+      await adminAPI.activateUser(owner.id);
+      setMessage('Owner reactivated');
+      await loadData();
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Failed to reactivate owner');
+    }
+  };
+
+  const deleteOwnerAccount = async (owner) => {
+    if (!owner) return;
+    const name = owner.full_name || owner.email;
+    if (!confirm(`Permanently delete ${name}? This will remove their profile and free their house for reassignment.`)) return;
     try {
       await adminAPI.deleteUser(owner.id);
       setMessage('Owner permanently deleted');
-      setOwnerDeleteModal({ open: false, owner: null });
-      loadData();
+      await loadData();
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to permanently delete owner');
     }
@@ -331,32 +338,38 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteStudent = (student) => {
-    // Open confirmation modal with options: Deactivate (default) or Permanently delete
-    setDeleteModal({ open: true, student });
-  };
-
-  const confirmDeactivate = async () => {
-    const student = deleteModal.student;
+  const deactivateStudentAccount = async (student) => {
     if (!student) return;
+    const name = student.full_name || student.email;
+    if (!confirm(`Deactivate ${name}? They will no longer be able to log in, but history will remain.`)) return;
     try {
-      await adminAPI.deleteStudent(student.student_record_id); // soft-delete
-      setMessage('Student deactivated');
-      setDeleteModal({ open: false, student: null });
-      loadStudents();
+      await adminAPI.deleteStudent(student.student_record_id);
+      setMessage('Student account deactivated');
+      await loadStudents();
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to deactivate student');
     }
   };
 
-  const confirmPermanentDelete = async () => {
-    const student = deleteModal.student;
+  const reactivateStudentAccount = async (student) => {
     if (!student) return;
     try {
-      await adminAPI.deleteStudentForce(student.student_record_id); // force delete
+      await adminAPI.activateUser(student.user_id);
+      setMessage('Student reactivated');
+      await loadStudents();
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Failed to reactivate student');
+    }
+  };
+
+  const deleteStudentAccount = async (student) => {
+    if (!student) return;
+    const name = student.full_name || student.email;
+    if (!confirm(`Permanently delete ${name}? This will remove their bookings, payment proofs, and allow them to re-register.`)) return;
+    try {
+      await adminAPI.deleteStudentForce(student.student_record_id);
       setMessage('Student permanently deleted');
-      setDeleteModal({ open: false, student: null });
-      loadStudents();
+      await loadStudents();
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to permanently delete student');
     }
@@ -542,6 +555,9 @@ export default function AdminDashboard() {
                         </div>
                         <div className="ml-4">
                           <h3 className="text-sm font-medium text-gray-900">{u.full_name || u.email}</h3>
+                          {u.is_active === false && (
+                            <span className="mt-1 inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">Inactive</span>
+                          )}
                           <div className="mt-1 text-sm text-gray-500">
                             <div className="flex items-center">
                               <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -577,9 +593,19 @@ export default function AdminDashboard() {
                             label: 'View Houses',
                             onClick: () => handleShowOwnerHouses(u),
                           },
+                          u.is_active === false
+                            ? {
+                                label: 'Reactivate Account',
+                                onClick: () => reactivateOwnerAccount(u),
+                              }
+                            : {
+                                label: 'Deactivate Account (keep data)',
+                                onClick: () => deactivateOwnerAccount(u),
+                                danger: true,
+                              },
                           {
-                            label: 'Remove Owner',
-                            onClick: () => handleDeleteOwner(u),
+                            label: 'Delete Account Permanently',
+                            onClick: () => deleteOwnerAccount(u),
                             danger: true,
                           },
                           {
@@ -788,16 +814,23 @@ export default function AdminDashboard() {
                     <div className="flex-1 min-w-0">
                       <button onClick={() => showStudentDetails(student)} className="text-left w-full">
                         <div className="flex items-center gap-3">
-                          <h3 className="text-sm font-medium text-gray-900 underline">
-                            {student.full_name || (
-                              <a
-                                href={buildMailto(student.email, MAILTO_SUBJECTS.support)}
-                                className="text-blue-600 hover:underline"
-                              >
-                                {student.email}
-                              </a>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-medium text-gray-900 underline">
+                              {student.full_name || (
+                                <a
+                                  href={buildMailto(student.email, MAILTO_SUBJECTS.support)}
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {student.email}
+                                </a>
+                              )}
+                            </h3>
+                            {student.is_active === false && (
+                              <span className="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700">
+                                Inactive
+                              </span>
                             )}
-                          </h3>
+                          </div>
                           {/* Verification badges */}
                           <div className="flex gap-2">
                             {student.email_verified ? (
@@ -837,9 +870,19 @@ export default function AdminDashboard() {
                             label: student.admin_verified ? 'Mark as Unverified' : 'Mark as Verified',
                             onClick: () => toggleVerification(student.student_record_id),
                           },
+                          student.is_active === false
+                            ? {
+                                label: 'Reactivate Account',
+                                onClick: () => reactivateStudentAccount(student),
+                              }
+                            : {
+                                label: 'Deactivate Account (keep history)',
+                                onClick: () => deactivateStudentAccount(student),
+                                danger: true,
+                              },
                           {
-                            label: 'Delete Student',
-                            onClick: () => handleDeleteStudent(student),
+                            label: 'Delete Account Permanently',
+                            onClick: () => deleteStudentAccount(student),
                             danger: true,
                           },
                           {
@@ -1091,70 +1134,6 @@ export default function AdminDashboard() {
             </div>
             <div className="mt-4 text-right">
               <button onClick={() => setOwnerHousesModal({ open: false, owner: null, houses: [] })} className="px-4 py-2 bg-gray-100 rounded">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete confirmation modal */}
-      {deleteModal.open && deleteModal.student && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-black opacity-40"></div>
-          <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold">Delete student</h3>
-            <p className="mt-2 text-sm text-gray-600">Choose how to remove <strong>{deleteModal.student.full_name || deleteModal.student.email}</strong> from the system.</p>
-
-            <div className="mt-4 flex gap-3">
-              <button
-                onClick={confirmDeactivate}
-                className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded shadow-sm border"
-              >
-                Deactivate (keep history)
-              </button>
-              <button
-                onClick={confirmPermanentDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded shadow-sm"
-              >
-                Permanently delete (remove bookings)
-              </button>
-              <button
-                onClick={() => setDeleteModal({ open: false, student: null })}
-                className="ml-auto px-4 py-2 bg-gray-100 text-gray-800 rounded border"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Owner Delete confirmation modal */}
-      {ownerDeleteModal.open && ownerDeleteModal.owner && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-black opacity-40"></div>
-          <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold">Remove owner</h3>
-            <p className="mt-2 text-sm text-gray-600">Choose how to remove <strong>{ownerDeleteModal.owner.full_name || ownerDeleteModal.owner.email}</strong> from the system.</p>
-
-            <div className="mt-4 flex gap-3">
-              <button
-                onClick={confirmDeactivateOwner}
-                className="px-4 py-2 bg-yellow-100 text-yellow-800 rounded shadow-sm border"
-              >
-                Deactivate (keep data)
-              </button>
-              <button
-                onClick={confirmPermanentDeleteOwner}
-                className="px-4 py-2 bg-red-600 text-white rounded shadow-sm"
-              >
-                Permanently delete (remove owner)
-              </button>
-              <button
-                onClick={() => setOwnerDeleteModal({ open: false, owner: null })}
-                className="ml-auto px-4 py-2 bg-gray-100 text-gray-800 rounded border"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>

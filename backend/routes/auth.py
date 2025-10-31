@@ -16,7 +16,7 @@ import re
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import datetime, timedelta
 import uuid
-from models import db, User, Student, HouseOwner, House, ResidentialArea
+from models import db, User, Student, HouseOwner, House, ResidentialArea, PaymentProof
 from sqlalchemy import func
 from config import Config
 from utils.email_utils import send_email_verification, send_student_verified_email
@@ -724,6 +724,7 @@ def delete_student(student_id):
 
             Booking.query.filter_by(student_id=user.id).delete(synchronize_session=False)
             BookingInquiry.query.filter_by(student_id=user.id).delete(synchronize_session=False)
+            PaymentProof.query.filter_by(user_id=user.id).delete(synchronize_session=False)
 
             # Now delete student record and user
             db.session.delete(student)
