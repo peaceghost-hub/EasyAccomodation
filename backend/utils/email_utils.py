@@ -14,9 +14,9 @@ def send_admin_created_email(to_email: str, to_name: str, created_by_name: str):
         print("SendGrid API key not configured - email not sent")
         return False
 
-    from_email = getattr(Config, 'FROM_EMAIL', 'noreply@easyaccommodation.com')
+    from_email = getattr(Config, 'FROM_EMAIL', 'magomobenam765@gmail.com')
     subject = 'Your admin account has been created'
-    content = f"Hello {to_name},\n\nAn admin account for you was created by {created_by_name} on EasyAccommodation. You can now log in using your email. If you did not expect this, please contact support at {getattr(Config, 'ADMIN_EMAIL', 'admin@easyaccommodation.com')}.\n\nRegards,\nEasyAccommodation Team"
+    content = f"Hello {to_name},\n\nAn admin account for you was created by {created_by_name} on EasyAccommodation. You can now log in using your email. If you did not expect this, please contact support at {getattr(Config, 'ADMIN_EMAIL', 'magomobenam765@gmail.com')}.\n\nRegards,\nEasyAccommodation Team"
 
     url = 'https://api.sendgrid.com/v3/mail/send'
     payload = {
