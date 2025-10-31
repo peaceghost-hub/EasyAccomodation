@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import api, { houseAPI, bookingAPI } from '../services/api';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { buildMailto, MAILTO_SUBJECTS } from '../utils/mailto';
 
 export default function HouseDetail() {
   const { id } = useParams();
@@ -255,12 +256,9 @@ export default function HouseDetail() {
                 </div>
                 {house.owner_contact && house.is_claimed && (
                   <div className="text-sm text-gray-700 bg-blue-50 px-4 py-2 rounded-full border border-blue-200">
-                    Owner: <span className="font-semibold">{house.owner_contact.name}</span> —
-                    {" "}
+                    Owner: <span className="font-semibold">{house.owner_contact.name}</span> —{' '}
                     <a
-                      href={`https://mail.google.com/mail/?view=cm&fs=1&to=${house.owner_contact.email}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      href={buildMailto(house.owner_contact.email, MAILTO_SUBJECTS.owner)}
                       className="text-blue-600 hover:text-blue-800 font-medium"
                     >
                       {house.owner_contact.email}
@@ -378,9 +376,7 @@ export default function HouseDetail() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                           <a
-                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${house.owner_contact.email}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href={buildMailto(house.owner_contact.email, MAILTO_SUBJECTS.owner)}
                             className="text-blue-600 hover:text-blue-800 font-medium"
                           >
                             {house.owner_contact.email}
@@ -522,9 +518,8 @@ export default function HouseDetail() {
           </div>
         )}
       </div>
-
-      {/* Map Modal (safe, token-guarded) */}
-      {showMap && house && (
+  {/* Map Modal (safe, token-guarded) */}
+  {showMap && house && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50" onClick={() => setShowMap(false)}></div>
           <div className="relative bg-white rounded-xl shadow-lg w-full max-w-3xl p-6">

@@ -3,6 +3,7 @@ import { adminAPI } from '../services/api';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import ActionMenu from '../components/common/ActionMenu';
+import { buildMailto, MAILTO_SUBJECTS } from '../utils/mailto';
 
 export default function AdminDashboard() {
   const [houses, setHouses] = useState([]);
@@ -547,9 +548,7 @@ export default function AdminDashboard() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                               </svg>
                               <a
-                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${u.email}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={buildMailto(u.email, MAILTO_SUBJECTS.owner)}
                                 className="text-blue-600 hover:underline"
                               >
                                 {u.email}
@@ -731,9 +730,7 @@ export default function AdminDashboard() {
                               {h.owner ? (
                                 h.owner.email ? (
                                   <a
-                                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${h.owner.email}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    href={buildMailto(h.owner.email, MAILTO_SUBJECTS.owner)}
                                     className="text-blue-600 hover:underline"
                                   >
                                     {h.owner.email}
@@ -794,9 +791,7 @@ export default function AdminDashboard() {
                           <h3 className="text-sm font-medium text-gray-900 underline">
                             {student.full_name || (
                               <a
-                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${student.email}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={buildMailto(student.email, MAILTO_SUBJECTS.support)}
                                 className="text-blue-600 hover:underline"
                               >
                                 {student.email}
@@ -827,9 +822,7 @@ export default function AdminDashboard() {
                         </div>
                         <div className="mt-1 text-sm text-gray-500">
                           <a
-                            href={`https://mail.google.com/mail/?view=cm&fs=1&to=${student.email}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            href={buildMailto(student.email, MAILTO_SUBJECTS.support)}
                             className="text-blue-600 hover:underline"
                           >
                             {student.email}
@@ -1004,9 +997,7 @@ export default function AdminDashboard() {
                               Student: {b.student.name} —
                               {" "}
                               <a
-                                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${b.student.email}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={buildMailto(b.student.email, MAILTO_SUBJECTS.booking)}
                                 className="text-blue-600 hover:underline"
                               >
                                 {b.student.email}

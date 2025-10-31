@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api, { ownerAPI, ownerUpload } from '../services/api';
 import axios from 'axios';
 import ActionMenu from '../components/common/ActionMenu';
+import { buildMailto, MAILTO_SUBJECTS } from '../utils/mailto';
 
 // include is_occupied by default for new rooms
 const emptyRoom = () => ({ room_number: '', capacity: 1, price_per_month: 0, is_available: true, is_occupied: false });
@@ -566,9 +567,7 @@ export default function OwnerHouseEdit() {
                         <td className="px-4 py-3 text-sm text-gray-700">
                           {b.student?.email ? (
                             <a
-                              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${b.student.email}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              href={buildMailto(b.student.email, MAILTO_SUBJECTS.booking)}
                               className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
                             >
                               {b.student.email}
@@ -618,9 +617,7 @@ export default function OwnerHouseEdit() {
                         <div className="font-semibold text-gray-800 mb-1">
                           {iq.student_name} — {iq.student_email ? (
                             <a
-                              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${iq.student_email}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              href={buildMailto(iq.student_email, MAILTO_SUBJECTS.owner)}
                               className="text-blue-600 hover:text-blue-800 hover:underline"
                             >
                               {iq.student_email}

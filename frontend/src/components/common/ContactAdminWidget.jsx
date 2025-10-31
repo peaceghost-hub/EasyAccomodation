@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { buildMailto, MAILTO_SUBJECTS } from '../../utils/mailto';
 
 /**
  * Compact floating admin contact widget.
@@ -6,7 +7,6 @@ import React, { useState } from 'react';
  */
 const ADMIN_EMAIL = 'magomobenam765@gmail.com';
 const ADMIN_PHONE = '+263787690803';
-const MAILTO_SUBJECT = encodeURIComponent('EasyAccomodation Support Request');
 
 export default function ContactAdminWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,7 +50,7 @@ export default function ContactAdminWidget() {
           <div className="space-y-3 text-blue-800">
             <div className="font-semibold text-sm">Admin</div>
             <a
-              href={`mailto:${ADMIN_EMAIL}?subject=${MAILTO_SUBJECT}`}
+              href={buildMailto(ADMIN_EMAIL, MAILTO_SUBJECTS.support)}
               className="flex items-center gap-2 p-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
             >
               <span className="text-lg">📧</span>
