@@ -6,39 +6,6 @@ export default function HomePage() {
     <div className="min-h-screen house-pattern-bg">
       {/* Animated gradient overlay */}
       <div className="gradient-overlay"></div>
-      
-      {/* Fixed Contact Admin Card */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <div className="glass rounded-xl shadow-2xl p-5 w-72 border-2 border-blue-200">
-          <div className="flex items-center mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-lg font-bold mr-3">
-              👤
-            </div>
-            <h4 className="text-blue-900 font-bold text-lg">Contact Admin</h4>
-          </div>
-          <div className="space-y-2">
-            <div className="text-sm text-blue-800">
-              <div className="font-semibold text-base mb-2">Benam Magomo</div>
-              <div className="flex items-center gap-2 mb-2 p-2 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                <span className="text-lg">📧</span>
-                <a
-                  href="https://mail.google.com/mail/?view=cm&fs=1&to=magomobenam765@gmail.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 font-medium text-xs"
-                >
-                  magomobenam765@gmail.com
-                </a>
-              </div>
-              <div className="flex items-center gap-2 p-2 bg-blue-50 rounded-lg">
-                <span className="text-lg">📞</span>
-                <span className="font-medium">+263787690803</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 py-20 sm:py-28">

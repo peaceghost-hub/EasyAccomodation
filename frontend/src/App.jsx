@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navbar from './components/common/Navbar';
+import ContactAdminWidget from './components/common/ContactAdminWidget';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -30,6 +31,7 @@ function AppContent() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <ContactAdminWidget />
       <Routes>
         <Route path="/" element={<HomePage />} />
   <Route path="/login" element={<LoginPage />} />
