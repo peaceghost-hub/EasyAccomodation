@@ -4,6 +4,10 @@ import React, { useState } from 'react';
  * Compact floating admin contact widget.
  * Shows a single-line link on load; expands to the full contact card on demand to avoid obstructing mobile layouts.
  */
+const ADMIN_EMAIL = 'magomobenam765@gmail.com';
+const ADMIN_PHONE = '+263787690803';
+const MAILTO_SUBJECT = encodeURIComponent('EasyAccomodation Support Request');
+
 export default function ContactAdminWidget() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -46,17 +50,15 @@ export default function ContactAdminWidget() {
           <div className="space-y-3 text-blue-800">
             <div className="font-semibold text-sm">Admin</div>
             <a
-              href="https://mail.google.com/mail/?view=cm&fs=1&to=magomobenam765@gmail.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              href={`mailto:${ADMIN_EMAIL}?subject=${MAILTO_SUBJECT}`}
               className="flex items-center gap-2 p-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors"
             >
               <span className="text-lg">📧</span>
-              <span className="text-xs font-medium text-blue-700 break-all">magomobenam765@gmail.com</span>
+              <span className="text-xs font-medium text-blue-700 break-all">{ADMIN_EMAIL}</span>
             </a>
             <div className="flex items-center gap-2 p-2 rounded-lg bg-blue-50">
               <span className="text-lg">📞</span>
-              <span className="text-sm font-medium">+263787690803</span>
+              <span className="text-sm font-medium">{ADMIN_PHONE}</span>
             </div>
           </div>
         </div>
