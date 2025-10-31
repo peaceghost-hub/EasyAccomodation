@@ -26,6 +26,16 @@ export default function OwnerHouseEdit() {
   const [lightboxImage, setLightboxImage] = useState(null);
   const [uploadingSlot, setUploadingSlot] = useState(null);
 
+  const loadOwnerCollections = async () => {
+    try {
+      const response = await ownerAPI.getMyHouseBookings();
+      setBookings(response.data?.bookings || []);
+      setInquiries(response.data?.inquiries || []);
+    } catch (e) {
+      // Non-fatal failure when loading bookings/inquiries
+    }
+  };
+
   useEffect(() => {
     const fetch = async () => {
       try {
@@ -62,17 +72,7 @@ export default function OwnerHouseEdit() {
       }
     };
     fetch();
-    // load bookings and inquiries for this owner
-    const loadOwnerBookings = async () => {
-      try {
-        const r = await ownerAPI.getMyHouseBookings();
-        if (r.data && r.data.bookings) setBookings(r.data.bookings || []);
-        if (r.data && r.data.inquiries) setInquiries(r.data.inquiries || []);
-      } catch (e) {
-        // non-fatal
-      }
-    };
-    loadOwnerBookings();
+    loadOwnerCollections();
   }, []);
 
   const handleFileChange = (e) => setFiles(Array.from(e.target.files || []));
@@ -182,11 +182,8 @@ export default function OwnerHouseEdit() {
 
   if (!house) return <div className="p-6">No house assigned or loading...</div>;
 
-  const refreshInquiries = async () => {
-    try {
-      const r = await ownerAPI.getMyHouseBookings();
-      if (r.data && r.data.inquiries) setInquiries(r.data.inquiries || []);
-    } catch {}
+  const refreshOwnerCollections = async () => {
+    await loadOwnerCollections();
   };
 
   const verifyInquiry = async (iq) => {
@@ -194,7 +191,7 @@ export default function OwnerHouseEdit() {
     try {
       await ownerAPI.verifyInquiry(iq.id, response);
       setActionMessage('Inquiry verified');
-      refreshInquiries();
+  refreshOwnerCollections();
     } catch (e) {
       setActionMessage(e.response?.data?.message || 'Failed to verify inquiry');
     }
@@ -205,7 +202,7 @@ export default function OwnerHouseEdit() {
     try {
       await ownerAPI.cancelInquiry(iq.id);
       setActionMessage('Inquiry cancelled');
-      refreshInquiries();
+  refreshOwnerCollections();
     } catch (e) {
       setActionMessage(e.response?.data?.message || 'Failed to cancel inquiry');
     }
@@ -216,9 +213,46 @@ export default function OwnerHouseEdit() {
     try {
       await ownerAPI.deleteInquiry(iq.id);
       setActionMessage('Inquiry deleted');
-      refreshInquiries();
+      refreshOwnerCollections();
     } catch (e) {
       setActionMessage(e.response?.data?.message || 'Failed to delete inquiry');
+    }
+  };
+
+  const acceptBooking = async (booking) => {
+    try {
+      await ownerAPI.acceptBooking(booking.id);
+      setActionMessage('Booking accepted');
+      refreshOwnerCollections();
+    } catch (e) {
+      setActionMessage(e.response?.data?.message || 'Failed to accept booking');
+    }
+  };
+
+  const cancelBookingOwner = async (booking) => {
+    if (!confirm('Cancel this booking?')) return;
+    let payload;
+    try {
+      const reason = prompt('Optional reason to share with the student:');
+      if (reason) {
+        payload = { reason };
+      }
+      await ownerAPI.cancelBooking(booking.id, payload);
+      setActionMessage('Booking cancelled');
+      refreshOwnerCollections();
+    } catch (e) {
+      setActionMessage(e.response?.data?.message || 'Failed to cancel booking');
+    }
+  };
+
+  const deleteBookingOwner = async (booking) => {
+    if (!confirm('Delete this booking permanently?')) return;
+    try {
+      await ownerAPI.deleteBooking(booking.id);
+      setActionMessage('Booking deleted');
+      refreshOwnerCollections();
+    } catch (e) {
+      setActionMessage(e.response?.data?.message || 'Failed to delete booking');
     }
   };
 
@@ -556,43 +590,72 @@ export default function OwnerHouseEdit() {
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Room</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Type</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Owner Decision</th>
                       <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {bookings.map((b, idx) => (
-                      <tr key={b.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">{b.id}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{b.student?.name || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          {b.student?.email ? (
-                            <a
-                              href={buildMailto(b.student.email, MAILTO_SUBJECTS.booking)}
-                              className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
-                            >
-                              {b.student.email}
-                            </a>
-                          ) : '—'}
-                          <br/><span className="text-gray-500">{b.student?.phone || ''}</span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700 font-medium">{b.room?.room_number || '—'}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-                            {b.booking_type}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">{new Date(b.booking_date).toLocaleString()}</td>
-                        <td className="px-4 py-3 text-sm">
-                          {b.is_paid ? (
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">✓ Paid</span>
-                          ) : b.booking_type === 'reserved' ? (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Reserved ({b.days_until_expiry}d left)</span>
-                          ) : (
-                            <span className="text-gray-600">{b.booking_type}</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {bookings.map((b, idx) => {
+                      const ownerStatus = (b.owner_status || 'pending').toLowerCase();
+                      const ownerStatusLabel = ownerStatus.charAt(0).toUpperCase() + ownerStatus.slice(1);
+                      const ownerStatusClass = ownerStatus === 'accepted'
+                        ? 'bg-green-100 text-green-700'
+                        : ownerStatus === 'cancelled'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-100 text-gray-600';
+                      const actionItems = [
+                        ...(ownerStatus !== 'accepted' ? [{ label: 'Accept Booking', onClick: () => acceptBooking(b) }] : []),
+                        ...(ownerStatus !== 'cancelled' ? [{ label: 'Cancel Booking', onClick: () => cancelBookingOwner(b) }] : []),
+                        { label: 'Delete Booking', onClick: () => deleteBookingOwner(b), danger: true },
+                      ];
+
+                      return (
+                        <tr key={b.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <td className="px-4 py-3 text-sm text-gray-700 font-medium">{b.id}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700">{b.student?.name || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-700">
+                            {b.student?.email ? (
+                              <a
+                                href={buildMailto(b.student.email, MAILTO_SUBJECTS.booking)}
+                                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                              >
+                                {b.student.email}
+                              </a>
+                            ) : '—'}
+                            <br/><span className="text-gray-500">{b.student?.phone || ''}</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-700 font-medium">{b.room?.room_number || '—'}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                              {b.booking_type}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{new Date(b.booking_date).toLocaleString()}</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${ownerStatusClass}`}>
+                              {ownerStatusLabel}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {b.is_paid ? (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">✓ Paid</span>
+                            ) : b.booking_type === 'reserved' ? (
+                              <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-medium">Reserved ({b.days_until_expiry}d left)</span>
+                            ) : (
+                              <span className="text-gray-600">{b.booking_type}</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right">
+                            {actionItems.length > 0 ? (
+                              <ActionMenu items={actionItems} label="Manage" variant="subtle" align="right" />
+                            ) : (
+                              <span className="text-gray-400">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

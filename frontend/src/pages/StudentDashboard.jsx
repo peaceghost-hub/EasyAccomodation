@@ -551,14 +551,25 @@ export default function StudentDashboard() {
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Room</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Type</th>
                           <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Date</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Status</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Owner Response</th>
-                          <th className="px-3 py-2" />
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Booking Status</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Owner Decision</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {myBookings.map(b => (
-                          <tr key={b.id}>
+                        {myBookings.map(b => {
+                          const ownerStatus = (b.owner_status || 'pending').toLowerCase();
+                          const ownerStatusClass = ownerStatus === 'accepted'
+                            ? 'text-green-700'
+                            : ownerStatus === 'cancelled'
+                              ? 'text-red-700'
+                              : 'text-gray-600';
+                          const ownerStatusLabel = ownerStatus.charAt(0).toUpperCase() + ownerStatus.slice(1);
+
+                          const canCancel = !b.is_paid && ownerStatus !== 'cancelled' && b.booking_type !== 'cancelled';
+
+                          return (
+                            <tr key={b.id}>
                             <td className="px-3 py-2 text-sm text-gray-700">
                               <button className="underline" onClick={() => navigate(`/houses/${b.house?.id}`)}>
                                 {b.house?.address}
@@ -578,13 +589,19 @@ export default function StudentDashboard() {
                                 b.booking_type
                               )}
                             </td>
+                            <td className="px-3 py-2 text-sm">
+                              <span className={ownerStatusClass}>{ownerStatusLabel}</span>
+                            </td>
                             <td className="px-3 py-2 text-right">
-                              {!b.is_paid && b.booking_type !== 'cancelled' && (
+                              {canCancel ? (
                                 <button className="text-sm px-3 py-1.5 border rounded bg-white hover:bg-gray-50" onClick={() => cancelBooking(b)}>Cancel</button>
+                              ) : (
+                                <span className="text-gray-400">—</span>
                               )}
                             </td>
-                          </tr>
-                        ))}
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

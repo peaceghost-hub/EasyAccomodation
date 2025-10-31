@@ -343,6 +343,18 @@ def create_tables():
                 print("🛠️ Created table payment_proofs")
         except Exception as pt_e:
             print(f"⚠️ Payment proofs table creation skipped or failed: {pt_e}")
+
+        # Ensure bookings.owner_status exists
+        try:
+            insp = inspect(db.engine)
+            cols = [c['name'] for c in insp.get_columns('bookings')]
+            if 'owner_status' not in cols:
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE bookings ADD COLUMN owner_status VARCHAR(20) DEFAULT 'pending'"))
+                    conn.commit()
+                print("🛠️ Added column bookings.owner_status")
+        except Exception as mig_e:
+            print(f"⚠️ Migration check for bookings.owner_status failed or not needed: {mig_e}")
     except Exception as e:
         print(f"❌ Error creating database tables: {e}")
 

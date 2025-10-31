@@ -51,6 +51,7 @@ class Booking(db.Model):
     
     # Notes
     notes = db.Column(db.Text)
+    owner_status = db.Column(db.String(20), default='pending')  # 'pending', 'accepted', 'cancelled'
     cancellation_reason = db.Column(db.Text)
     
     # Timestamps
@@ -89,6 +90,7 @@ class Booking(db.Model):
             'days_until_expiry': self.days_until_expiry,
             'inquiry_status': self.inquiry_status,
             'notes': self.notes,
+            'owner_status': self.owner_status or 'pending',
         }
         
         # Include student details if requested (for house owners viewing bookings)

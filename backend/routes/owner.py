@@ -12,12 +12,27 @@ Endpoints:
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, User, House, HouseOwner, Room
+from models import db, User, House, HouseOwner, Room, Booking
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
 owner_bp = Blueprint('owner', __name__)
+
+
+def _release_room_and_refresh_fullness(room):
+    if not room:
+        return
+    room.is_occupied = False
+    room.is_available = True
+    room.current_tenant_id = None
+    room.occupancy_start_date = None
+    room.occupancy_end_date = None
+    try:
+        if room.house:
+            room.house.is_full = (room.house.available_rooms == 0)
+    except Exception:
+        pass
 
 
 @owner_bp.route('/house', methods=['GET'])
@@ -318,6 +333,104 @@ def get_owner_house_bookings():
 
     except Exception as e:
         return jsonify({'success': False, 'message': f'Failed to get owner bookings: {str(e)}'}), 500
+
+
+@owner_bp.route('/bookings/<int:booking_id>/accept', methods=['PUT'])
+@jwt_required()
+def accept_booking(booking_id):
+    try:
+        current_user_id = int(get_jwt_identity())
+        user = User.query.get(current_user_id)
+
+        if not user or user.user_type != 'house_owner':
+            return jsonify({'success': False, 'message': 'House owner access required'}), 403
+
+        booking = Booking.query.get(booking_id)
+        if not booking or not booking.house or booking.house.owner_id != user.id:
+            return jsonify({'success': False, 'message': 'Booking not found'}), 404
+
+        payload = request.get_json() or {}
+        booking.owner_status = 'accepted'
+        if 'message' in payload:
+            booking.owner_response = payload.get('message')
+            booking.owner_response_date = datetime.utcnow()
+        else:
+            booking.owner_response_date = datetime.utcnow()
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Booking accepted',
+            'booking': booking.to_dict(include_student_details=True, include_house_details=True)
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to accept booking: {str(e)}'}), 500
+
+
+@owner_bp.route('/bookings/<int:booking_id>/cancel', methods=['PUT'])
+@jwt_required()
+def cancel_booking(booking_id):
+    try:
+        current_user_id = int(get_jwt_identity())
+        user = User.query.get(current_user_id)
+
+        if not user or user.user_type != 'house_owner':
+            return jsonify({'success': False, 'message': 'House owner access required'}), 403
+
+        booking = Booking.query.get(booking_id)
+        if not booking or not booking.house or booking.house.owner_id != user.id:
+            return jsonify({'success': False, 'message': 'Booking not found'}), 404
+
+        payload = request.get_json() or {}
+        booking.owner_status = 'cancelled'
+        booking.booking_type = 'cancelled'
+        booking.cancellation_reason = payload.get('reason', 'Cancelled by house owner')
+        if 'message' in payload:
+            booking.owner_response = payload.get('message')
+        booking.owner_response_date = datetime.utcnow()
+
+        _release_room_and_refresh_fullness(booking.room)
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Booking cancelled',
+            'booking': booking.to_dict(include_student_details=True, include_house_details=True)
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to cancel booking: {str(e)}'}), 500
+
+
+@owner_bp.route('/bookings/<int:booking_id>', methods=['DELETE'])
+@jwt_required()
+def delete_booking(booking_id):
+    try:
+        current_user_id = int(get_jwt_identity())
+        user = User.query.get(current_user_id)
+
+        if not user or user.user_type != 'house_owner':
+            return jsonify({'success': False, 'message': 'House owner access required'}), 403
+
+        booking = Booking.query.get(booking_id)
+        if not booking or not booking.house or booking.house.owner_id != user.id:
+            return jsonify({'success': False, 'message': 'Booking not found'}), 404
+
+        _release_room_and_refresh_fullness(booking.room)
+
+        db.session.delete(booking)
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Booking deleted', 'deleted_id': booking_id}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to delete booking: {str(e)}'}), 500
 
 
 @owner_bp.route('/rooms/<int:room_id>/occupancy', methods=['PUT'])

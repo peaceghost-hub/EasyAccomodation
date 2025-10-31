@@ -378,22 +378,26 @@ def cancel_booking(booking_id):
                 'message': 'Booking is already cancelled'
             }), 400
         
-        # Cancel booking
-        booking.booking_type = 'cancelled'
-        booking.cancellation_reason = request.get_json().get('reason', 'Cancelled by student')
-        
         # Free up the room if it was occupied
-        if booking.room:
-            room = booking.room
+        room = booking.room
+        if room:
             room.is_occupied = False
+            room.is_available = True
             room.current_tenant_id = None
             room.occupancy_start_date = None
-        
+            room.occupancy_end_date = None
+            try:
+                if room.house:
+                    room.house.is_full = (room.house.available_rooms == 0)
+            except Exception:
+                pass
+
+        db.session.delete(booking)
         db.session.commit()
         
         return jsonify({
             'success': True,
-            'message': 'Booking cancelled successfully'
+            'message': 'Booking cancelled and removed'
         }), 200
         
     except Exception as e:
