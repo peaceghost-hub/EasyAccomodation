@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
-import { bookingAPI, paymentProofAPI, authAPI } from '../services/api';
+import { bookingAPI, paymentProofAPI, authAPI, houseAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function StudentDashboard() {
@@ -29,7 +28,7 @@ export default function StudentDashboard() {
     const fetchAreas = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:5000/api/houses/residential-areas');
+        const res = await houseAPI.getAreas();
         const arr = res.data.areas || [];
         setAreas(arr);
         // default sorted closest-first using current campus (main initially)
@@ -73,7 +72,7 @@ export default function StudentDashboard() {
     if (!selectedArea) return;
     const fetchHouses = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/houses/area/${selectedArea.id}`);
+        const res = await houseAPI.getByArea(selectedArea.id);
         setWithAccommodation(res.data.houses_with_accommodation || []);
         setFull(res.data.houses_full || []);
       } catch (e) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { houseAPI } from '../services/api';
 
 export default function AreasPage() {
   const [areas, setAreas] = useState([]);
@@ -8,7 +8,7 @@ export default function AreasPage() {
   useEffect(() => {
     const fetchAreas = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/houses/residential-areas');
+        const res = await houseAPI.getAreas();
         setAreas(res.data.areas || []);
       } catch (e) {
         console.error('Failed to fetch areas', e);

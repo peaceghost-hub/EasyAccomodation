@@ -1,9 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import axios from 'axios';
-import api from '../services/api';
+import api, { houseAPI, bookingAPI } from '../services/api';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { bookingAPI } from '../services/api';
 
 export default function HouseDetail() {
   const { id } = useParams();
@@ -20,7 +18,7 @@ export default function HouseDetail() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/houses/${id}`);
+        const res = await houseAPI.getById(id);
         const h = res.data.house;
         // Normalize images to full backend URLs (house.images may be '/static/house_images/..')
         const backendBase = (api.defaults.baseURL || '').replace(/\/?api\/?$/, '');

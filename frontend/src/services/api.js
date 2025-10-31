@@ -97,6 +97,7 @@ export const adminAPI = {
 export const houseAPI = {
   getAll: (params) => api.get('/houses', { params }),
   getAreas: () => api.get('/houses/residential-areas'),
+  getByArea: (areaId) => api.get(`/houses/area/${areaId}`),
   getById: (id) => api.get(`/houses/${id}`),
   getUnclaimed: () => api.get('/houses/unclaimed'),
 };

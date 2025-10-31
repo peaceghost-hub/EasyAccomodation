@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
+import { houseAPI } from '../services/api';
 
 export default function HousesByArea() {
   const { areaId } = useParams();
@@ -11,7 +11,7 @@ export default function HousesByArea() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/houses/area/${areaId}`);
+        const res = await houseAPI.getByArea(areaId);
         setArea(res.data.area);
         setWithAccommodation(res.data.houses_with_accommodation || []);
         setFull(res.data.houses_full || []);
