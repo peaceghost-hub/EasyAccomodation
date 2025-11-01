@@ -91,7 +91,7 @@ class Config:
     # Merchant code provided by EcoCash (not secret). Default set per request; override via env in production.
     ECOCASH_MERCHANT_ID = os.getenv('ECOCASH_MERCHANT_ID', '08658')
     ECOCASH_API_KEY = os.getenv('ECOCASH_API_KEY')
-    ECOCASH_MODE = os.getenv('ECOCASH_MODE', 'sandbox')  # 'sandbox' or 'live'
+    ECOCASH_MODE = os.getenv('ECOCASH_MODE', 'live')  # 'sandbox' or 'live'
     ECOCASH_BASE_URL = os.getenv('ECOCASH_BASE_URL', 'https://developers.ecocash.co.zw/api/ecocash_pay')
     # Number that receives the payment (merchant wallet)
     ECOCASH_RECEIVER_MSISDN = os.getenv('ECOCASH_RECEIVER_MSISDN', '0787690803')

@@ -2,6 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global dark theme overrides and professional background */
+@layer base {
+  :root {
+    --app-bg-from: #0b0b0c; /* near black */
+    --app-bg-to: #1a1b1e;   /* deep gray */
+    --panel-bg: rgba(255,255,255,0.06);
+    --panel-border: rgba(255,255,255,0.12);
+    --text-muted: rgba(255,255,255,0.75);
+  }
+}
+
+.bg-app {
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(255,255,255,0.06), transparent 60%),
+              linear-gradient(180deg, var(--app-bg-from), var(--app-bg-to));
+  background-attachment: fixed;
+}
+
+.dark-theme {
+  color: white;
+}
+
+/* Elevation panels: override common light classes into dark glass panels */
+.dark-theme .bg-white { background-color: var(--panel-bg) !important; }
+.dark-theme .bg-gray-50 { background-color: rgba(255,255,255,0.04) !important; }
+.dark-theme .border-gray-100, 
+.dark-theme .border-gray-200, 
+.dark-theme .border { border-color: var(--panel-border) !important; }
+.dark-theme .text-gray-900, 
+.dark-theme .text-gray-800, 
+.dark-theme .text-gray-700 { color: white !important; }
+.dark-theme .text-gray-600, 
+.dark-theme .text-gray-500 { color: var(--text-muted) !important; }
+.dark-theme .shadow-md, 
+.dark-theme .shadow-xl { box-shadow: 0 8px 28px rgba(0,0,0,0.5) !important; }
+
+/* Inputs */
+.dark-theme input,
+.dark-theme select,
+.dark-theme textarea {
+  background-color: rgba(255,255,255,0.04);
+  color: white;
+  border-color: var(--panel-border);
+}
+.dark-theme input::placeholder,
+.dark-theme textarea::placeholder { color: rgba(255,255,255,0.45); }
+
+/* Buttons: keep primary blues, make subtle buttons glassy */
+.dark-theme .bg-white.hover\:bg-gray-50:hover { background-color: rgba(255,255,255,0.1) !important; }
+.dark-theme .glass { background-color: var(--panel-bg); border-color: var(--panel-border); }
+
+/* Navbar backdrop blur helper */
+.nav-blur {
+  background: linear-gradient(180deg, rgba(0,0,0,0.65), rgba(0,0,0,0.35));
+  backdrop-filter: saturate(180%) blur(10px);
+}
+
 @layer base {
   body {
     @apply bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 text-gray-900;
