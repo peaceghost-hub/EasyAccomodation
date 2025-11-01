@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { bookingAPI, paymentProofAPI, authAPI, houseAPI } from '../services/api';
+import { bookingAPI, paymentProofAPI, authAPI, houseAPI, paymentsAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function StudentDashboard() {
@@ -16,7 +16,10 @@ export default function StudentDashboard() {
   const [myInquiries, setMyInquiries] = useState([]);
   const [sortByClosest, setSortByClosest] = useState(true);
   const [uploadState, setUploadState] = useState('idle'); // idle | loading | success | error
-  const { isAuthenticated, isStudent, user } = useAuth();
+  const [ecoState, setEcoState] = useState('idle'); // idle | requesting | waiting | success | failed
+  const [ecoMessage, setEcoMessage] = useState('');
+  const ecoPollRef = useRef(null);
+  const { isAuthenticated, isStudent, user, updateLocalUser } = useAuth();
   const navigate = useNavigate();
   const proofInputRef = useRef(null);
 
@@ -53,6 +56,71 @@ export default function StudentDashboard() {
     } catch (e) {
       setMessage(e.response?.data?.message || 'Upload failed');
       setUploadState('error');
+    }
+  };
+
+  const handlePayViaEcoCash = async () => {
+    if (ecoState === 'requesting' || ecoState === 'waiting') return;
+    const input = prompt('Enter your EcoCash number (e.g., 0771234567):');
+    if (!input) return;
+    setEcoState('requesting');
+    setEcoMessage('Sending request to EcoCash…');
+    try {
+      const res = await paymentsAPI.ecocashInitiate(input.trim());
+      const reference = res.data?.reference;
+      if (!reference) {
+        setEcoState('failed');
+        setEcoMessage(res.data?.message || 'Failed to start EcoCash payment');
+        return;
+      }
+      setEcoState('waiting');
+      setEcoMessage('Check your phone and approve the EcoCash prompt. Waiting for confirmation…');
+      // Start polling
+      const start = Date.now();
+      const poll = async () => {
+        try {
+          const st = await paymentsAPI.ecocashStatus(reference);
+          const status = st.data?.status;
+          if (status === 'completed') {
+            setEcoState('success');
+            setEcoMessage('Payment successful! Updating your verification…');
+            // Refresh profile to pick up admin_verified and update auth context
+            try {
+              const p = await authAPI.getProfile();
+              if (p?.data?.user) {
+                updateLocalUser(p.data.user);
+              }
+            } catch {}
+            clearInterval(ecoPollRef.current);
+            ecoPollRef.current = null;
+            return;
+          }
+          if (status === 'failed') {
+            setEcoState('failed');
+            setEcoMessage('Payment failed. Please try again or upload proof of payment.');
+            clearInterval(ecoPollRef.current);
+            ecoPollRef.current = null;
+            return;
+          }
+          // timeout after 2 minutes
+          if (Date.now() - start > 120000) {
+            setEcoState('failed');
+            setEcoMessage('Timed out waiting for payment confirmation. You can retry or upload proof.');
+            clearInterval(ecoPollRef.current);
+            ecoPollRef.current = null;
+            return;
+          }
+        } catch (e) {
+          // Network or auth issue; keep trying briefly
+        }
+      };
+      // poll every 3 seconds
+      ecoPollRef.current = setInterval(poll, 3000);
+      // fire immediately too
+      poll();
+    } catch (e) {
+      setEcoState('failed');
+      setEcoMessage(e.response?.data?.message || e.message || 'Failed to start EcoCash payment');
     }
   };
   
@@ -524,7 +592,20 @@ export default function StudentDashboard() {
                   >
                     {uploadButtonLabel}
                   </button>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${ecoState === 'success' ? 'bg-green-600 text-white border border-green-600' : ecoState === 'waiting' || ecoState === 'requesting' ? 'bg-blue-500 text-white border border-blue-500 cursor-wait' : 'bg-emerald-600 text-white border border-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500'}`}
+                    onClick={handlePayViaEcoCash}
+                    disabled={ecoState === 'requesting' || ecoState === 'waiting'}
+                  >
+                    {ecoState === 'waiting' || ecoState === 'requesting' ? 'Processing…' : 'Pay via EcoCash ($5)'}
+                  </button>
                 </div>
+                {ecoMessage && (
+                  <div className={`mt-3 text-sm ${ecoState === 'failed' ? 'text-red-700' : ecoState === 'success' ? 'text-green-700' : 'text-gray-700'}`}>
+                    {ecoMessage}
+                  </div>
+                )}
               </section>
               <section className="bg-white rounded-xl shadow-md border border-gray-100 p-6">
                 <div className="flex items-center justify-between mb-4">

@@ -88,8 +88,17 @@ class Config:
     PAYPAL_MODE = 'sandbox' if DEBUG else 'live'  # sandbox = testing mode
     
     # EcoCash
-    ECOCASH_MERCHANT_ID = os.getenv('ECOCASH_MERCHANT_ID')
+    # Merchant code provided by EcoCash (not secret). Default set per request; override via env in production.
+    ECOCASH_MERCHANT_ID = os.getenv('ECOCASH_MERCHANT_ID', '08658')
     ECOCASH_API_KEY = os.getenv('ECOCASH_API_KEY')
+    ECOCASH_MODE = os.getenv('ECOCASH_MODE', 'sandbox')  # 'sandbox' or 'live'
+    ECOCASH_BASE_URL = os.getenv('ECOCASH_BASE_URL', 'https://developers.ecocash.co.zw/api/ecocash_pay')
+    # Number that receives the payment (merchant wallet)
+    ECOCASH_RECEIVER_MSISDN = os.getenv('ECOCASH_RECEIVER_MSISDN', '0787690803')
+    # Fixed amount for student verification (USD)
+    ECOCASH_VERIFICATION_AMOUNT_USD = float(os.getenv('ECOCASH_VERIFICATION_AMOUNT_USD', 5))
+    # Public callback path (must match your EcoCash app settings)
+    ECOCASH_CALLBACK_PATH = os.getenv('ECOCASH_CALLBACK_PATH', '/api/v1/ecocash/callback')
     
     # --------------------------------------------
     # GOOGLE MAPS SETTINGS

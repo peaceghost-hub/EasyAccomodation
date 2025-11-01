@@ -150,6 +150,9 @@ def register_blueprints(app):
     # Payment routes (process payments)
     from routes.payment import payment_bp
     app.register_blueprint(payment_bp, url_prefix='/api/payments')
+    # EcoCash callback routes
+    from routes.ecocash import ecocash_bp
+    app.register_blueprint(ecocash_bp, url_prefix='/api/v1/ecocash')
     # Payment proof uploads (students upload proof of payment)
     from routes.payment_proofs import payment_bp as payment_proofs_bp
     app.register_blueprint(payment_proofs_bp, url_prefix='/api/payment-proofs')

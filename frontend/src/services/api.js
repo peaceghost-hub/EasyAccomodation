@@ -73,6 +73,11 @@ export const paymentProofAPI = {
   uploadProof: (formData) => api.post('/payment-proofs/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
 };
 
+export const paymentsAPI = {
+  ecocashInitiate: (msisdn) => api.post('/payments/ecocash/initiate', { msisdn }),
+  ecocashStatus: (reference) => api.get(`/payments/ecocash/status/${reference}`),
+};
+
 export const adminAPI = {
   addArea: (data) => api.post('/admin/residential-areas', data),
   updateArea: (id, data) => api.put(`/admin/residential-areas/${id}`, data),

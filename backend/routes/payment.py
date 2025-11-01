@@ -17,6 +17,8 @@ from datetime import datetime, timedelta
 from models import db, Payment, SubscriptionPayment, House, Room, User, HouseOwner, Booking
 from config import Config
 import uuid
+import requests
+import logging
 
 # Create Blueprint
 payment_bp = Blueprint('payments', __name__)
@@ -318,6 +320,103 @@ def get_payment_details(payment_id):
             'success': False,
             'message': f'Failed to get payment: {str(e)}'
         }), 500
+
+
+@payment_bp.route('/ecocash/initiate', methods=['POST'])
+@jwt_required()
+def ecocash_initiate():
+    """
+    Initiate EcoCash C2B payment for student verification.
+    Body: { msisdn: string }
+    Returns: { reference: string, message }
+    """
+    try:
+        current_user_id = get_jwt_identity()
+        user = User.query.get(current_user_id)
+        if not user or user.user_type != 'student':
+            return jsonify({'success': False, 'message': 'Only students can pay for verification'}), 403
+
+        data = request.get_json() or {}
+        msisdn = str(data.get('msisdn', '')).strip()
+        if not msisdn:
+            return jsonify({'success': False, 'message': 'msisdn (phone number) is required'}), 400
+
+        # Normalize msisdn to 263 format if user enters 07xxxxxxxx
+        if msisdn.startswith('07') and len(msisdn) == 10:
+            msisdn_263 = '263' + msisdn[1:]
+        elif msisdn.startswith('263'):
+            msisdn_263 = msisdn
+        elif msisdn.startswith('+263'):
+            msisdn_263 = msisdn[1:]
+        else:
+            msisdn_263 = msisdn  # best-effort
+
+        amount = Config.ECOCASH_VERIFICATION_AMOUNT_USD
+        currency = 'USD'
+        reason = 'Student Verification'
+        source_ref = str(uuid.uuid4())
+
+        # Create payment record as pending
+        payment = Payment(
+            payment_type='student_verification',
+            payer_id=current_user_id,
+            recipient_id=None,
+            amount=amount,
+            currency=currency,
+            payment_method='ecocash',
+            status='pending',
+            transaction_reference=source_ref,
+            notes=f'EcoCash payment init for {reason}'
+        )
+        db.session.add(payment)
+        db.session.commit()
+
+        # Build EcoCash API URL
+        path = '/api/v2/payment/instant/c2b/sandbox' if Config.ECOCASH_MODE == 'sandbox' else '/api/v2/payment/instant/c2b/live'
+        url = f"{Config.ECOCASH_BASE_URL.rstrip('/')}{path}"
+
+        payload = {
+            'customerMsisdn': msisdn_263,
+            'amount': amount,
+            'reason': reason,
+            'currency': currency,
+            'sourceReference': source_ref,
+        }
+
+        headers = {
+            'X-API-KEY': (Config.ECOCASH_API_KEY or ''),
+            'Content-Type': 'application/json',
+        }
+
+        try:
+            # Fire-and-forget: even if request fails, keep payment pending and let user retry
+            resp = requests.post(url, json=payload, headers=headers, timeout=20)
+            # Save raw response for troubleshooting
+            payment.gateway_response = (resp.text or '')[:4000]
+            db.session.commit()
+        except Exception as ex:
+            logging.exception('EcoCash initiate request failed')
+            payment.gateway_response = f'ERROR: {str(ex)}'
+            db.session.commit()
+
+        return jsonify({'success': True, 'message': 'EcoCash request sent. Check your phone to approve.', 'reference': source_ref}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': f'Failed to initiate EcoCash: {str(e)}'}), 500
+
+
+@payment_bp.route('/ecocash/status/<reference>', methods=['GET'])
+@jwt_required()
+def ecocash_status(reference):
+    """Poll status for a given EcoCash source reference (only for owner of the payment)."""
+    try:
+        current_user_id = get_jwt_identity()
+        payment = Payment.query.filter_by(transaction_reference=reference).first()
+        if not payment or payment.payer_id != current_user_id:
+            return jsonify({'success': False, 'message': 'Not found'}), 404
+        return jsonify({'success': True, 'status': payment.status, 'payment': payment.to_dict()}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'Failed to get status: {str(e)}'}), 500
 
 
 @payment_bp.route('/verify', methods=['POST'])
