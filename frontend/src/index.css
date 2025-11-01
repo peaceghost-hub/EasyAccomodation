@@ -5,17 +5,16 @@
 /* Global dark theme overrides and professional background */
 @layer base {
   :root {
-    --app-bg-from: #0b0b0c; /* near black */
-    --app-bg-to: #1a1b1e;   /* deep gray */
+    --app-bg-from: #000000; /* pure black */
+    --app-bg-to: #000000;   /* pure black */
     --panel-bg: rgba(255,255,255,0.06);
     --panel-border: rgba(255,255,255,0.12);
-    --text-muted: rgba(255,255,255,0.75);
+    --text-muted: rgba(255,255,255,0.78);
   }
 }
 
 .bg-app {
-  background: radial-gradient(1200px 600px at 50% -10%, rgba(255,255,255,0.06), transparent 60%),
-              linear-gradient(180deg, var(--app-bg-from), var(--app-bg-to));
+  background: linear-gradient(180deg, var(--app-bg-from), var(--app-bg-to));
   background-attachment: fixed;
 }
 
@@ -60,7 +59,7 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-blue-50 via-sky-50 to-indigo-50 text-gray-900;
+    @apply bg-black text-white;
     min-height: 100vh;
   }
 }

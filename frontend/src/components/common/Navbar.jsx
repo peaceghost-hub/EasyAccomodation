@@ -81,7 +81,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-neutral-900/70 supports-[backdrop-filter]:backdrop-blur-md">
+  <nav className="sticky top-0 z-50 border-b border-white/10 bg-black/70 supports-[backdrop-filter]:backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-lg" onClick={closeMenu}>
@@ -124,7 +124,7 @@ const Navbar = () => {
       {/* Animated mobile menu with smooth collapse/expand */}
       <div
         id="mobile-menu"
-        className={`md:hidden overflow-hidden border-t border-white/10 bg-neutral-900/80 supports-[backdrop-filter]:backdrop-blur-md transition-[max-height,opacity] duration-300 ease-out ${menuOpen ? 'opacity-100' : 'opacity-0'}`}
+        className={`md:hidden overflow-hidden border-t border-white/10 bg-black/80 supports-[backdrop-filter]:backdrop-blur-md transition-[max-height,opacity] duration-300 ease-out ${menuOpen ? 'opacity-100' : 'opacity-0'}`}
         style={{ maxHeight: menuOpen ? '480px' : '0px' }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-3">
