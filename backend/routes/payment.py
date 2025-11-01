@@ -375,13 +375,37 @@ def ecocash_initiate():
         path = '/api/v2/payment/instant/c2b/sandbox' if Config.ECOCASH_MODE == 'sandbox' else '/api/v2/payment/instant/c2b/live'
         url = f"{Config.ECOCASH_BASE_URL.rstrip('/')}{path}"
 
+        # Normalize receiving merchant number to 263 format
+        recv = (Config.ECOCASH_RECEIVER_MSISDN or '').strip()
+        if recv.startswith('07') and len(recv) == 10:
+            recv_263 = '263' + recv[1:]
+        elif recv.startswith('+263'):
+            recv_263 = recv[1:]
+        elif recv.startswith('263'):
+            recv_263 = recv
+        else:
+            recv_263 = recv
+
+        # Build callback URL for EcoCash to notify us (if they require it in request)
+        try:
+            base = request.host_url.rstrip('/')  # e.g., http://localhost:5000
+            cb = Config.ECOCASH_CALLBACK_PATH or '/api/v1/ecocash/callback'
+            callback_url = f"{base}{cb}"
+        except Exception:
+            callback_url = None
+
         payload = {
             'customerMsisdn': msisdn_263,
             'amount': amount,
             'reason': reason,
             'currency': currency,
             'sourceReference': source_ref,
+            # Include merchant details so payment goes to your merchant instead of a default sandbox merchant
+            'merchantCode': Config.ECOCASH_MERCHANT_ID,
+            'payeeMsisdn': recv_263,
         }
+        if callback_url:
+            payload['callbackUrl'] = callback_url
 
         headers = {
             'X-API-KEY': (Config.ECOCASH_API_KEY or ''),
