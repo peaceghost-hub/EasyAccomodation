@@ -91,6 +91,9 @@ class Booking(db.Model):
             'inquiry_status': self.inquiry_status,
             'notes': self.notes,
             'owner_status': self.owner_status or 'pending',
+            'owner_response': self.owner_response,
+            'owner_response_date': self.owner_response_date.isoformat() if self.owner_response_date else None,
+            'cancellation_reason': self.cancellation_reason,
         }
         
         # Include student details if requested (for house owners viewing bookings)
