@@ -259,7 +259,7 @@ export default function StudentDashboard() {
                   <p className="font-semibold">Your account is pending admin verification.</p>
                   <p>To gain full access to browse houses and make bookings, please:</p>
                   <ol className="list-decimal list-inside space-y-1 ml-2">
-                    <li>Upload your proof of payment below ($5 subscription fee)</li>
+                    <li>Upload your proof of payment below ($0.50 subscription fee)</li>
                     <li>Wait for admin approval (usually within 24 hours)</li>
                   </ol>
                   <p className="mt-3 font-medium">Until verified, you can only upload proof of payment. Areas and houses are locked.</p>
@@ -570,7 +570,7 @@ export default function StudentDashboard() {
                   <h2 className="text-xl font-semibold text-gray-900">Subscription — Upload Proof of Payment</h2>
                 </div>
                 <div className="text-sm text-gray-700 mb-3">
-                  A subscription to access the app is $5. Please pay via Ecocash to <strong>0787690803 (Benam Magomo)</strong> or
+                  A subscription to access the app is $0.50. Please pay via Ecocash to <strong>0787690803 (Benam Magomo)</strong> or
                   bank account <strong>263787690803840</strong>. After payment, upload a photo or screenshot of the payment here and the admin will review it.
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -598,7 +598,7 @@ export default function StudentDashboard() {
                     onClick={handlePayViaEcoCash}
                     disabled={ecoState === 'requesting' || ecoState === 'waiting'}
                   >
-                    {ecoState === 'waiting' || ecoState === 'requesting' ? 'Processing…' : 'Pay via EcoCash ($5)'}
+                    {ecoState === 'waiting' || ecoState === 'requesting' ? 'Processing…' : 'Pay via EcoCash ($0.50)'}
                   </button>
                 </div>
                 {ecoMessage && (

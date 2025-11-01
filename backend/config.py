@@ -96,7 +96,8 @@ class Config:
     # Number that receives the payment (merchant wallet)
     ECOCASH_RECEIVER_MSISDN = os.getenv('ECOCASH_RECEIVER_MSISDN', '0787690803')
     # Fixed amount for student verification (USD)
-    ECOCASH_VERIFICATION_AMOUNT_USD = float(os.getenv('ECOCASH_VERIFICATION_AMOUNT_USD', 5))
+    # Default verification amount set low for live testing; override via env in production
+    ECOCASH_VERIFICATION_AMOUNT_USD = float(os.getenv('ECOCASH_VERIFICATION_AMOUNT_USD', 0.5))
     # Public callback path (must match your EcoCash app settings)
     ECOCASH_CALLBACK_PATH = os.getenv('ECOCASH_CALLBACK_PATH', '/api/v1/ecocash/callback')
     
